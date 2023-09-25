@@ -1,17 +1,15 @@
-#include <iostream>
-
 class Card
 {
     public:
-    int value;
-    char suit;
     Card getCard();
+    Card(int val, char suit);
+    int getValue(Card get);
+    char getSuit(Card get);
 
 
     private: 
-    
-
-
+    int value;
+    char suit;
 };
 
 class Deck
@@ -19,5 +17,6 @@ class Deck
     public:
         Card deck[52];
 
-    private: 
+    private:
+        void shuffle(Deck deck); 
 };
