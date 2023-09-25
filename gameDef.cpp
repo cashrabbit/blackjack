@@ -5,10 +5,11 @@ Card::Card(int val, char suit){
     this -> suit = suit;
 }
 
-int Card::getValue(Card get){
-    return get.value;
+int Card::getValue(Card get)
+{
+    return value;
 }
 
 char Card::getSuit(Card get){
-    return get.suit;
+    return suit;
 }
