@@ -1,10 +1,12 @@
 class Card
 {
     public:
-    Card getCard();
-    Card(int val, char suit);
     int getValue(Card get);
     char getSuit(Card get);
+    Card();
+    Card(int val, int suit);
+    void setValue(Card set, int val);
+    void setSuit(Card set, char suit);
 
 
     private: 
@@ -15,8 +17,10 @@ class Card
 class Deck
 {
     public:
-        Card deck[52];
+    Card getCard(int a);
+    Deck();
 
     private:
-        void shuffle(Deck deck); 
+    Card deck[52];
+ 
 };
