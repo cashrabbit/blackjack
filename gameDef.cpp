@@ -1,15 +1,26 @@
-#include "gameRun.h"
-
-Card::Card(int val, char suit){
-    value = val;
-    this -> suit = suit;
-}
-
-int Card::getValue(Card get)
+class Card
 {
-    return value;
-}
+    public:
+    int getValue(Card get);
+    char getSuit(Card get);
+    Card();
+    Card(int val, int suit);
+    void setValue(Card set, int val);
+    void setSuit(Card set, char suit);
 
-char Card::getSuit(Card get){
-    return suit;
-}
+
+    private: 
+    int value;
+    char suit;
+};
+
+class Deck
+{
+    public:
+    Card getCard(int a);
+    Deck();
+
+    private:
+    Card deck[52];
+ 
+};
