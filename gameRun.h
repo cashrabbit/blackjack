@@ -1,4 +1,7 @@
-int const HAND_SIZE = 2;
+#include <vector>
+
+char welcome();
+void runBlackjack();
 
 class Card
 {
@@ -27,16 +30,19 @@ class Deck
     Card pullCard(int a)const;
     
     private:
-    Card deck[52];
+    std::vector<Card> deck;
  
 };
 
 class Player{
     public:
     Player();
+    //getters
     Card getCard(int i);
     double getFunds();
+    //setters
     void setFunds(double amt);
+    void setHand(int handSize, Deck deck, std::vector<int>::iterator dealt);
     double bet();
     double bet(double min);
     // void fold();
@@ -44,6 +50,11 @@ class Player{
     void rakeIn(double amt);
 
     private:
-    Card hand[HAND_SIZE];
+    std::vector<Card> hand;
     double funds;
+};
+class Dealer:public Player{
+    public:
+    Dealer();
+    void resetFunds();
 };
