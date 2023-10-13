@@ -5,14 +5,15 @@
 char welcome(){
     char input;
     bool valid;
+    //prints welcome message
     std::cout << "\nWelcome to our casino!\n\nPlease select a menu option:";
-    std::cout << "\n(b) Blackjack\n(t) Texas Hold 'em\n"; //add for every game
-    do{
+    std::cout << "\n(A) Blackjack\n(B) Texas Hold 'em\n"; //add for every game
+    do{//checks input validity
     std::cin >> input;
-    input = tolower(input);
+    input = toupper(input);
     switch(input){//add to every game
-        case 'b': 
-        case 't':
+        case 'A': 
+        case 'B':
             valid = true;
             break;
         default:

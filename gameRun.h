@@ -1,7 +1,5 @@
+#include <iostream>
 #include <vector>
-
-char welcome();
-void runBlackjack();
 
 class Card
 {
@@ -26,8 +24,14 @@ class Card
 class Deck
 {
     public:
+    //constructors
     Deck();
+    // destrcutor
+    ~Deck();
+    //getters
     Card pullCard(int a)const;
+    //remove from deck
+    void removeCard(int cardNum);
     
     private:
     std::vector<Card> deck;
@@ -36,17 +40,22 @@ class Deck
 
 class Player{
     public:
+    //constructors
     Player();
+    //destructor
+    ~Player();
     //getters
-    Card getCard(int i);
+    std::vector<Card> getHand();
     double getFunds();
+    
     //setters
     void setFunds(double amt);
-    void setHand(int handSize, Deck deck, std::vector<int>::iterator dealt);
+    void setHand(Card c);
+    //player "move" function
     double bet();
     double bet(double min);
-    // void fold();
-    // void check(); 
+    //void fold();
+    //void check(); 
     void rakeIn(double amt);
 
     private:
@@ -55,6 +64,15 @@ class Player{
 };
 class Dealer:public Player{
     public:
+    //constructor
     Dealer();
+    //guarantee house never goes broke
     void resetFunds();
 };
+
+//extra function declarations
+char welcome();
+void runBlackjack();
+int deal(Player p, Deck deck, int deckSize);
+bool checkCard(std::vector<int> dealt, int num);
+std::ostream& operator<<(std::ostream& o, std::vector<Card> hand);

@@ -3,72 +3,93 @@
 #include <vector>
 #include <algorithm>
 
+//checks to see if card has already been dealt
 bool checkCard(std::vector<int> dealt, int num){
     if(std::count(dealt.begin(), dealt.end(), num)==1)
         return false;
     else
         return true;
 }
+//default constructor
 Card::Card(){
     value = 0;
     suit = 'n';
 }
+//paramaterized constructor
 Card::Card(int val, char suit){
     value = val;
     this -> suit = suit;
 }
+//get card value
 int Card::getValue() const{
     return value;
 }
+//get card suit
 char Card::getSuit() const{
     return suit;
 }
+//set card value
 void Card::setValue(int val){
     value = val;
 }
+//set card suit
 void Card::setSuit(char suit){
     this -> suit = suit;
 }
+//construct deck and assign each card value
 Deck::Deck(){
+    Card c;
     for(int i=1; i<=13; i++){
-        deck.at(i-1).setValue(i); 
-        deck.at(i-1).setSuit('D'); 
-        deck.at(i+12).setValue(i);
-        deck.at(i+12).setSuit('H');
-        deck.at(i+25).setValue(i);
-        deck.at(i+25).setSuit('S');
-        deck.at(i+38).setValue(i);
-        deck.at(i+38).setSuit('C');
+        c.setValue(i);
+        c.setSuit('D');
+        deck.push_back(c);
+        c.setValue(i);
+        c.setSuit('H');
+        deck.push_back(c);
+        c.setValue(i);
+        c.setSuit('S');
+        deck.push_back(c);
+        c.setValue(i);
+        c.setSuit('C');
+        deck.push_back(c);
     }
 }
+//deck destructor
+Deck::~Deck(){
+}
+//getCard from deck
 Card Deck::pullCard(int a) const{
-    return deck.at(a);
-} 
+    return deck[a];
+}
+void Deck::removeCard(int cardNum){
+    std::vector<Card>::iterator it;
+    it = deck.begin() + cardNum;
+    deck.erase(it);
+}
+//construct player 
 Player::Player(){
     setFunds(500.00);
 }
-Card Player::getCard(int i){
-    return hand.at(i);
+//destruct player
+Player::~Player(){
 }
+//get card from players hand
+std::vector<Card> Player::getHand(){
+    return hand;
+}
+//return current player funds
 double Player::getFunds(){
     return funds;
 }
+//change player funds
 void Player::setFunds(double amt){
     funds = getFunds() + amt;
 }
-void Player::setHand(int handSize, Deck deck, std::vector<int>::iterator dealtPtr){
-    int cardNum;
-
-    hand.resize(handSize);
-    
-    for(int i = 0; i<handSize; i++){
-    do{
-        cardNum = rand()%52;
-    }while(!checkCard(&dealtPtr, cardNum));
-        hand.vector::push_back(deck.pullCard(cardNum));
-        dealtPtr.vector::push_back(cardNum);
-    }
+//put one card into player hand
+void Player::setHand(Card c){
+    hand.push_back(c);
 }
+//bets for player with no minimum
 double Player::bet(){
     double amt;
     do{
@@ -80,6 +101,7 @@ double Player::bet(){
     setFunds(-amt);
     return amt;
 }
+//bets for player with a minimum
 double Player::bet(double min){
     double amt;
     do{
@@ -94,12 +116,15 @@ double Player::bet(double min){
     setFunds(-amt);
     return amt;
 }
+//adds pot to player funds
 void Player::rakeIn(double amt){
     setFunds(amt);
 }
+//gives dealer essentially unlimited dollars 
 Dealer::Dealer(){
-    setFunds(9999.00);
+    setFunds(100000.00);
 }
+//reset dealer funds after hand
 void Dealer::resetFunds(){
-    setFunds(10000.00);
+    setFunds(100000.00);
 }
