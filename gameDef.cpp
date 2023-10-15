@@ -3,12 +3,29 @@
 #include <vector>
 #include <algorithm>
 
-//checks to see if card has already been dealt
-bool checkCard(std::vector<int> dealt, int num){
-    if(std::count(dealt.begin(), dealt.end(), num)==1)
-        return false;
+//insertion operator overload
+std::ostream& operator<<(std::ostream& o, Card c){
+    char val;
+
+        switch(c.getValue()){
+             case 1:
+                val = 'A';
+                break;
+            case 11: 
+                val = 'J';
+                break;
+            case 12:
+                val = 'Q';
+                break;
+            case 13:
+                val = 'K';
+                break;
+       }
+    if(c.getValue() >= 2 && c.getValue() <11)
+        return std::cout << c.getValue()<< "-" << c.getSuit();
     else
-        return true;
+        return std::cout << val << "-" << c.getSuit();
+
 }
 //default constructor
 Card::Card(){
@@ -64,7 +81,7 @@ Card Deck::pullCard(int a) const{
 void Deck::removeCard(int cardNum){
     std::vector<Card>::iterator it;
     it = deck.begin() + cardNum;
-    deck.erase(it);
+    this -> deck.erase(it);
 }
 //construct player 
 Player::Player(){
@@ -74,6 +91,9 @@ Player::Player(){
 Player::~Player(){
 }
 //get card from players hand
+Card Player::getCard(int i){
+    return hand[i];
+}
 std::vector<Card> Player::getHand(){
     return hand;
 }
@@ -89,6 +109,12 @@ void Player::setFunds(double amt){
 void Player::setHand(Card c){
     hand.push_back(c);
 }
+void Player::removeCard(int i){
+    std::vector<Card>::iterator it;
+    it = hand.begin() + i;
+    this -> hand.erase(it);
+}
+
 //bets for player with no minimum
 double Player::bet(){
     double amt;
@@ -100,6 +126,12 @@ double Player::bet(){
     }while (amt<funds);
     setFunds(-amt);
     return amt;
+}
+//prints hand and score
+void Player::printHand(int score){
+    for(int i=0; i< hand.size(); i++)
+        std::cout << hand[i] << " ";
+    std::cout<< "Score: " << score << std::endl <<std::endl;
 }
 //bets for player with a minimum
 double Player::bet(double min){

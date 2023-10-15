@@ -45,13 +45,15 @@ class Player{
     //destructor
     ~Player();
     //getters
+    Card getCard(int i);
     std::vector<Card> getHand();
+    void printHand(int score);
     double getFunds();
-    
     //setters
     void setFunds(double amt);
     void setHand(Card c);
-    //player "move" function
+    void removeCard(int i);
+    //player "move" functions
     double bet();
     double bet(double min);
     //void fold();
@@ -72,7 +74,6 @@ class Dealer:public Player{
 
 //extra function declarations
 char welcome();
+std::ostream& operator<<(std::ostream& o, Card c);
 void runBlackjack();
-int deal(Player p, Deck deck, int deckSize);
-bool checkCard(std::vector<int> dealt, int num);
-std::ostream& operator<<(std::ostream& o, std::vector<Card> hand);
+void burnCard(Deck& deck);
