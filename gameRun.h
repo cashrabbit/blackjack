@@ -29,6 +29,7 @@ class Deck
     // destrcutor
     ~Deck();
     //getters
+    std::vector<Card> getDeck();
     Card pullCard(int a)const;
     //remove from deck
     void removeCard(int cardNum);
@@ -49,6 +50,7 @@ class Player{
     std::vector<Card> getHand();
     void printHand(int score);
     double getFunds();
+    void printFunds();
     //setters
     void setFunds(double amt);
     void setHand(Card c);

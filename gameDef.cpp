@@ -78,10 +78,11 @@ Deck::~Deck(){
 Card Deck::pullCard(int a) const{
     return deck[a];
 }
+std::vector<Card> Deck::getDeck(){
+    return deck;
+}
 void Deck::removeCard(int cardNum){
-    std::vector<Card>::iterator it;
-    it = deck.begin() + cardNum;
-    this -> deck.erase(it);
+    this -> deck.erase(deck.begin()+cardNum);
 }
 //construct player 
 Player::Player(){
@@ -101,9 +102,12 @@ std::vector<Card> Player::getHand(){
 double Player::getFunds(){
     return funds;
 }
+void Player::printFunds(){
+    std::cout << funds << std::endl;
+}
 //change player funds
 void Player::setFunds(double amt){
-    funds = getFunds() + amt;
+    funds = amt;
 }
 //put one card into player hand
 void Player::setHand(Card c){
@@ -121,10 +125,10 @@ double Player::bet(){
     do{
     std::cout << "Enter bet amount: ";
     std::cin >> amt;
-    if(amt<funds)
+    if(amt>funds)
         std::cout << "You don't have the facilities for that" << std::endl; 
-    }while (amt<funds);
-    setFunds(-amt);
+    }while (amt>funds);
+    rakeIn(-amt);
     return amt;
 }
 //prints hand and score
@@ -145,12 +149,12 @@ double Player::bet(double min){
         std::cout << "This bet was less thn the minimum required" << std::endl;
     }while (amt>funds && amt<min);
 
-    setFunds(-amt);
+    rakeIn(-amt);
     return amt;
 }
 //adds pot to player funds
 void Player::rakeIn(double amt){
-    setFunds(amt);
+    setFunds(getFunds() + amt);
 }
 //gives dealer essentially unlimited dollars 
 Dealer::Dealer(){
