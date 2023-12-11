@@ -7,7 +7,7 @@ char welcome(){
     bool valid;
     //prints welcome message
     std::cout << "\nWelcome to our casino!\n\nPlease select a menu option:";
-    std::cout << "\n(A) Blackjack\n(B) Texas Hold 'em\n"; //add for every game
+    std::cout << "\n(A) Blackjack\n(B) Five-Card Draw\n"; //add for every game
     do{//checks input validity
     std::cin >> input;
     input = toupper(input);

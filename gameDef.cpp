@@ -27,32 +27,62 @@ std::ostream& operator<<(std::ostream& o, Card c){
         return std::cout << val << "-" << c.getSuit();
 
 }
+
+//deals one card and removes it from deck
+void deal(Player& p, Deck& deck){
+    int cardNum;
+
+    //picks a random card and assigns it to player
+    cardNum = rand() % deck.getDeck().size();
+    p.setHand(deck.pullCard(cardNum));
+    deck.removeCard(cardNum);
+}
+
+//Card class defs
 //default constructor
 Card::Card(){
     value = 0;
     suit = 'n';
 }
+
 //paramaterized constructor
 Card::Card(int val, char suit){
     value = val;
     this -> suit = suit;
 }
+
+/*Card::Card(const Card& c){
+    value = c.value;
+    suit = c.suit;
+}*/
+
 //get card value
 int Card::getValue() const{
     return value;
 }
+
 //get card suit
 char Card::getSuit() const{
     return suit;
 }
+
 //set card value
 void Card::setValue(int val){
     value = val;
 }
+
 //set card suit
 void Card::setSuit(char suit){
     this -> suit = suit;
 }
+
+/*Card& Card::operator=(Card& c){
+    value = c.value;
+    suit = c.suit;
+    return *this; 
+}*/
+
+//Deck class defs
 //construct deck and assign each card value
 Deck::Deck(){
     Card c;
@@ -71,65 +101,103 @@ Deck::Deck(){
         deck.push_back(c);
     }
 }
+
 //deck destructor
 Deck::~Deck(){
 }
+
 //getCard from deck
 Card Deck::pullCard(int a) const{
     return deck[a];
 }
+
+//prints deck
+void Deck::printDeck(){
+    for(int i = 0; i< deck.size(); i++)
+        std::cout << deck[i];
+    std::cout << std::endl;
+}
+
+//returns deck object
 std::vector<Card> Deck::getDeck(){
     return deck;
 }
+
+//removes one card from deck
 void Deck::removeCard(int cardNum){
-    this -> deck.erase(deck.begin()+cardNum);
+    deck.erase(deck.begin()+cardNum);
 }
+
+//Player class defs
 //construct player 
 Player::Player(){
     setFunds(500.00);
 }
+
 //destruct player
 Player::~Player(){
 }
+
 //get card from players hand
 Card Player::getCard(int i){
     return hand[i];
 }
+
 std::vector<Card> Player::getHand(){
     return hand;
 }
+
 //return current player funds
 double Player::getFunds(){
     return funds;
 }
+
+//print player funds
 void Player::printFunds(){
-    std::cout << funds << std::endl;
+    std::cout << "Current Funds: " << funds << std::endl;
 }
+
 //change player funds
 void Player::setFunds(double amt){
     funds = amt;
 }
+
 //put one card into player hand
 void Player::setHand(Card c){
     hand.push_back(c);
 }
-void Player::removeCard(int i){
+//takes one card from player hand
+void Player::removeCard(int n){
     std::vector<Card>::iterator it;
-    it = hand.begin() + i;
+    it = hand.begin() + n;
     this -> hand.erase(it);
+}
+
+//empty hand
+void Player::clearHand(){
+    hand.clear();
 }
 
 //bets for player with no minimum
 double Player::bet(){
     double amt;
+    bool valid;
+
     do{
+    //takes in player bet
     std::cout << "Enter bet amount: ";
     std::cin >> amt;
-    if(amt>funds)
-        std::cout << "You don't have the facilities for that" << std::endl; 
+    if(amt > funds || amt > 9999.0)
+        std::cout << "You don't have the facilities for that\n"; 
     }while (amt>funds);
     rakeIn(-amt);
     return amt;
+}
+//prints hand 
+void Player::printHand(){
+    for(int i=0; i< hand.size(); i++)
+        std::cout << hand[i] << " ";
+    std::cout<< std::endl;
 }
 //prints hand and score
 void Player::printHand(int score){
@@ -137,6 +205,7 @@ void Player::printHand(int score){
         std::cout << hand[i] << " ";
     std::cout<< "Score: " << score << std::endl <<std::endl;
 }
+
 //bets for player with a minimum
 double Player::bet(double min){
     double amt;
@@ -152,15 +221,30 @@ double Player::bet(double min){
     rakeIn(-amt);
     return amt;
 }
+
 //adds pot to player funds
 void Player::rakeIn(double amt){
     setFunds(getFunds() + amt);
 }
-//gives dealer essentially unlimited dollars 
-Dealer::Dealer(){
-    setFunds(100000.00);
+
+void order(std::vector <Card> &hand){
+    int tempInd;
+    Card temp1, temp2;
+    
+    for(int j = 0; j< hand.size(); j++){
+        temp1 = hand[j];
+        //gets smallest value
+        for(int i = j; i<hand.size(); i++){
+            if(hand[i].getValue() < temp1.getValue()){
+                temp1 = hand[i];
+                tempInd = i;
+            }
+        }
+        //puts smallest value at the front
+        temp2 = hand[j];
+        hand[j] = temp1;
+        hand[tempInd] = temp2;
+        
+    }
 }
-//reset dealer funds after hand
-void Dealer::resetFunds(){
-    setFunds(100000.00);
-}
+

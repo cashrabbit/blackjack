@@ -3,19 +3,14 @@
 #include <iostream>
 #include <vector>
 
-//int HAND_SIZE = 2;
-
 void runBlackjack(){
-    //creates player,dealer, and deck
-    Player p1;
-    Dealer dealer;
-    Deck deck;
+    //creates player & dealer
+    Player p1, dealer;
     //initializes player, dealer, and deck
     p1 = Player();
-    dealer = Dealer();
-    deck = Deck();
+    dealer = Player();
     //initialize necessary variables
-    bool win, tie, playAgain;
+    bool playAgain, blackjack, split;
     int deckSize;
     char choice; 
     double bet;
@@ -26,97 +21,124 @@ void runBlackjack(){
     //set random seed credits to my 
     //beautiful girlfriend: Laura Saravia
     srand(time(0));
+
+    //outputs welcome and rules
+    std::cout << "You chose Blackjack!\nRules:\n3:2"; 
+    std::cout << " Bet Return\nDealer Stands on 17\n\n";
     
-    //print funds and get bet
-    p1.printFunds();
-    bet = p1.bet();
+    //creates repeating game
+    if(!checkBroke(p1.getFunds())){
+        while(playAgain){
+            Deck deck;
+            p1.printFunds();
 
-    while(playAgain){
+            //gets bet
+            bet = p1.bet();
+            
+            //beginds round
+            dealAndCheck(p1, dealer, deck, split, blackjack);
+            
+            if(blackjack && checkBlackjack(dealer.getHand()) == false ){
+                    std::cout<< "BlackJack!! You win\n";
+                    p1.rakeIn(3.0*bet/2.0+bet);
+                    p1.printFunds();            
+            }
+            else if(split){
+                //create temp vector and copy cards into it
+                std::vector<Card> splitCards;
+                splitCards.push_back(p1.getCard(0));
+                splitCards.push_back(p1.getCard(1));
+                //clear/refil player hand
+                p1.clearHand();
+                p1.setHand(splitCards[0]);
 
-    //deal cards
-    for(int i=0; i<2; i++){
-        deal(p1, deck, deckSize);
-        deal(dealer, deck, deckSize);
-    }
-        //display dealt cards
-        p1.printHand(addHand(p1.getHand()));
-        std::cout << "Dealer's Up Card: " << dealer.getCard(0) << std:: endl;
-        //check blackjack and ask for split option
-        if(checkBlackjack(p1.getHand())&&!checkBlackjack(dealer.getHand())){
-            win = true;
-            std::cout<< "BlackJack!! You win";
+                playHand(p1, dealer, deck, bet, split, blackjack);
+                p1.clearHand();
+                dealer.clearHand();
+                split = false;
+                blackjack = false;
+                dealAndCheck(p1, dealer, deck, split, blackjack);
+                p1.clearHand();
+                p1.setHand(splitCards[1]);
+                p1.rakeIn(-bet);
+                playHand(p1, dealer, deck, bet, split, blackjack);
+            }
+            else
+                playHand(p1, dealer, deck, bet, split, blackjack);
+
+            split = false;
+            blackjack = false;
+            //checks to see if user wants to continue
+            playAgain = checkPlayAgain();
         }
-        else if(checkSplit(p1.getHand())){
-            Card temp;
-
-            temp.setValue(p1.getCard(0).getValue());
-            temp.setSuit(p1.getCard(0).getSuit());
-            Card splitCard = p1.getCard(0);
-            p1.removeCard(1);
-            playHand(p1, dealer, deck, win, tie);
-        for(int i = 0; i<p1.getHand().size(); i++)
-            p1.removeCard(i);
-            p1.setHand(temp);
-            playHand(p1, dealer, deck, win, tie);   
-        }
-        else{
-            playHand(p1, dealer, deck, win, tie);
-        }
-        if(win)
-            p1.rakeIn(3.0*bet/2.0);
-        else if(tie)
-            p1.rakeIn(bet);
-        else if (!win)
-            p1.rakeIn(-bet);
-        p1.printFunds();
-
-        playAgain = checkPlayAgain();
     }
 }   
 
-//deals one card and removes it from deck
-void deal(Player& p, Deck& deck, int& deckSize){
-    int cardNum;
-
-    cardNum = rand() % deck.getDeck().size();
-    p.setHand(deck.pullCard(cardNum));
-    deck.removeCard(cardNum);
-    //deckSize--;
-}
 //adds up value of all cards in hand
-int addHand(std::vector<Card> hand){
+int const addHand(std::vector<Card> hand){
     int score;
 
     score = 0;
+    //turns face cards into 10 pts
     for(int i = 0; i< hand.size(); i++){
         if(hand[i].getValue()>=10)
             score += 10;
         else if(hand[i].getValue()>=2)
             score += hand[i].getValue();
-        else if(hand[i].getValue() == 1){//deals woth ace=1/11 case
-            if(score > 10)
+        //deals with ace=1/11 case
+        else if(hand[i].getValue() == 1){
+            if(score + 11  > 21)
                 score +=1;
             else
                 score += 11;
         }
     }
-
+    for(int i = 0; i< hand.size(); i++){
+        if(hand[i].getValue()==1 && score > 21)
+            score -= 10;
+    }
+    
     return score;
 }
+//checks to see if player has blackjack
 bool checkBlackjack(std::vector<Card> hand){
     return (addHand(hand)==21);
 }
+
+//checks to see if player was dealt doubles
 bool checkSplit(std::vector<Card> hand){
     char ans;
     bool split, valid;
+    int val;
 
     split = false;
     valid = false;
-    if(hand[0].getValue() == hand[1].getValue()){
-        std::cout << "Do you want to split your " << hand[0].getValue() << "'s?\n(Y/N):";
+    val = hand[0].getValue();
+    if(val == hand[1].getValue()){
+        //asks players if they want to split
+        std::cout << "Do you want to split your ";
+        switch(val){
+            case 11:
+                std::cout << "J";
+                break;
+            case 12:
+                std::cout << "Q";
+                break;
+            case 13:
+                std::cout << "K";
+                break;
+            case 1:
+                std::cout << "A";
+                break;
+            default:
+                std::cout<<val;
+                break;
+        }
+        std::cout << "'s?\n(Y/N):";        
         while(!valid){      
         std::cin >> ans;
         ans = toupper(ans);
+        //checks input validity
         if(ans == 'Y'){
             valid = true;
             split = true;
@@ -133,31 +155,53 @@ bool checkSplit(std::vector<Card> hand){
 
 }
 
-void playHand(Player& p1, Player& dealer, Deck& deck, bool& win, bool& tie){
-    bool stand, bust;
+void dealAndCheck(Player& p1, Player& dealer, Deck& deck, bool& split, bool& blackjack){
+    //deal 2 cards to each player
+   for(int i=0; i<2; i++){
+        deal(p1, deck);
+        deal(dealer, deck);
+    }
+        //display dealt cards
+    p1.printHand(addHand(p1.getHand()));
+    std::cout << "Dealer's Up Card: " << dealer.getCard(0) << std:: endl;
+    //check blackjack and ask for split option
+    if(checkBlackjack(p1.getHand())&&!checkBlackjack(dealer.getHand()))
+        blackjack = true;
+    else if(checkSplit(p1.getHand())){
+        //creates temporary card and replaces hand after split round
+        p1.removeCard(1);
+        split = true;
+    }
+}
+
+//actually runs hand, most relevant part of code
+void playHand(Player& p1, Player& dealer, Deck& deck, double bet, bool& blackjack, bool& split){
+    bool stand, bust, win, tie, surrender;
     int pScore, dScore, deckSize;
     char choice;
 
     deckSize = 52;
-    bust = false;
     stand = false;
+    bust = false;
+    win = false;
+    tie = false;
 
-    while(!stand && !win){
+    //asks for player moves and checks validity until stand or surreder
+    while(!stand && !win && !surrender){
         std::cout << "Hit, Stand, or Surrender\n(H,S, or L):";
         std::cin >> choice;
         choice = toupper(choice);
+        //deals another card if they chose to hit
         if(choice == 'H'){
-            deal(p1, deck, deckSize);
+            deal(p1, deck);
             pScore= addHand(p1.getHand());
             std::cout<<std::endl;
             p1.printHand(pScore);
         }
-        else if(choice == 'S'){
+        else if(choice == 'S')
             stand = true;
-        }
-        else if(choice == 'L'){
-            stand = true;
-        }
+        else if(choice == 'L')
+            surrender = true;
         else
             std::cout << "Invalid Input. Choose H,S, or L.\n";
         pScore = addHand(p1.getHand());
@@ -177,7 +221,7 @@ void playHand(Player& p1, Player& dealer, Deck& deck, bool& win, bool& tie){
         dealer.printHand(addHand(dealer.getHand()));
         dScore = addHand(dealer.getHand());
         while(dScore < 17){
-            deal(dealer, deck, deckSize);
+            deal(dealer, deck);
             dScore = addHand(dealer.getHand());
             dealer.printHand(dScore);
         }
@@ -186,7 +230,12 @@ void playHand(Player& p1, Player& dealer, Deck& deck, bool& win, bool& tie){
     //displays scores
     std::cout << "Your score: " << pScore << "\nDealer's Score: " << dScore << std::endl << std::endl;
     //checks win conditions and displays status
-    if(dScore > 21){
+    if(surrender){
+        win = false;
+        std::cout << "You surrendered here is half of your bet back\n";
+        p1.rakeIn(bet/2.0);
+    }
+    else if(dScore > 21){
         win = true;
         std::cout << "Dealer Busted!\nYou win!\n";
     }
@@ -201,18 +250,30 @@ void playHand(Player& p1, Player& dealer, Deck& deck, bool& win, bool& tie){
         win = false;
         std::cout << "You lose this hand :(\n";
     }       
-    }   
+    }
+    if(win)
+            p1.rakeIn(3.0*bet/2.0 + bet);
+        else if(tie)
+            p1.rakeIn(bet); 
+    p1.printFunds(); 
+
+    //clears deck and players hands to  restart
+        p1.clearHand();
+        dealer.clearHand();
+
 }
 
 bool checkPlayAgain(){
     char playAgainChoice;
     bool playAgain;
     
+    
     do{
         std::cout << "Do you want to play again? (Y/N)";
         std:: cin >> playAgainChoice;
         playAgainChoice = toupper(playAgainChoice);
 
+        
         switch(playAgainChoice){
             case 'Y':
                 playAgain = true;
@@ -220,12 +281,21 @@ bool checkPlayAgain(){
             case 'N':
                 playAgain = false;
                 break;
-           default: 
+        default: 
                 playAgainChoice = 'Z';
                 std::cout << "Invalid Choice. Try again";
                 break;
         }
-    }while(playAgainChoice != 'Z');
-
+    }while(playAgainChoice == 'Z');
+    
     return playAgain;
+}
+
+bool checkBroke(double funds){
+    if(funds == 0){
+        std::cout << "You broke. Hope you had fun.\n\nBye\n";
+        return true;
+    }
+    else
+        return false;
 }

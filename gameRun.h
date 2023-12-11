@@ -6,6 +6,7 @@ class Card
     public:
     //constructors
     Card();
+    // Card(const Card& c);
     Card(int val, char suit);
     
     //getters
@@ -15,6 +16,9 @@ class Card
     //setters
     void setValue(int val);
     void setSuit(char suit);
+
+    //operator overloads
+    // Card& operator=(Card& c);
 
     private: 
     int value;
@@ -33,6 +37,7 @@ class Deck
     Card pullCard(int a)const;
     //remove from deck
     void removeCard(int cardNum);
+    void printDeck();
     
     private:
     std::vector<Card> deck;
@@ -40,42 +45,48 @@ class Deck
 };
 
 class Player{
+    //friend function to order cards
+    void friend Order(std::vector <Card> &hand);
+
     public:
     //constructors
     Player();
     //destructor
     ~Player();
+
     //getters
     Card getCard(int i);
     std::vector<Card> getHand();
-    void printHand(int score);
     double getFunds();
+    
+    //display functions
     void printFunds();
+    void printHand();
+    void printHand(int score);
+    
     //setters
     void setFunds(double amt);
     void setHand(Card c);
+
+
+    //card clear functions
     void removeCard(int i);
+    void clearHand();
+
     //player "move" functions
     double bet();
     double bet(double min);
-    //void fold();
-    //void check(); 
+     
     void rakeIn(double amt);
 
     private:
     std::vector<Card> hand;
     double funds;
 };
-class Dealer:public Player{
-    public:
-    //constructor
-    Dealer();
-    //guarantee house never goes broke
-    void resetFunds();
-};
 
 //extra function declarations
 char welcome();
 std::ostream& operator<<(std::ostream& o, Card c);
+void deal(Player& p, Deck& deck);
 void runBlackjack();
-void burnCard(Deck& deck);
+void runFiveCard();
