@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 
+
+//3 known issues: ace counter add hand, split function dont work, needs insurance
 void runBlackjack(){
     //creates player & dealer
     Player p1, dealer;
@@ -27,8 +29,8 @@ void runBlackjack(){
     std::cout << " Bet Return\nDealer Stands on 17\n\n";
     
     //creates repeating game
-    if(!checkBroke(p1.getFunds())){
-        while(playAgain){
+    while(playAgain){
+        if(!checkBroke(p1.getFunds())){
             Deck deck;
             p1.printFunds();
 
@@ -37,40 +39,53 @@ void runBlackjack(){
             
             //beginds round
             dealAndCheck(p1, dealer, deck, split, blackjack);
+
+            //ask to double down
+            doubleDown(p1, bet);
             
             if(blackjack && checkBlackjack(dealer.getHand()) == false ){
                     std::cout<< "BlackJack!! You win\n";
                     p1.rakeIn(3.0*bet/2.0+bet);
-                    p1.printFunds();            
+                    p1.printFunds();
+                    p1.clearHand();
+                    dealer.clearHand();            
             }
             else if(split){
                 //create temp vector and copy cards into it
                 std::vector<Card> splitCards;
                 splitCards.push_back(p1.getCard(0));
                 splitCards.push_back(p1.getCard(1));
+                
                 //clear/refil player hand
                 p1.clearHand();
                 p1.setHand(splitCards[0]);
 
-                playHand(p1, dealer, deck, bet, split, blackjack);
+                //play first hand
+                p1.printHand();
+                playHand(p1, dealer, deck, bet);
+                
+                //reset after hand
                 p1.clearHand();
                 dealer.clearHand();
-                split = false;
-                blackjack = false;
-                dealAndCheck(p1, dealer, deck, split, blackjack);
-                p1.clearHand();
+                
+                //reset cards and bet
                 p1.setHand(splitCards[1]);
+                deal(dealer, deck);
+                deal(dealer, deck);
                 p1.rakeIn(-bet);
-                playHand(p1, dealer, deck, bet, split, blackjack);
+                p1.printHand();
+                playHand(p1, dealer, deck, bet);
             }
             else
-                playHand(p1, dealer, deck, bet, split, blackjack);
+                playHand(p1, dealer, deck, bet);
 
             split = false;
             blackjack = false;
             //checks to see if user wants to continue
             playAgain = checkPlayAgain();
         }
+        else
+            playAgain = false;
     }
 }   
 
@@ -101,12 +116,12 @@ int const addHand(std::vector<Card> hand){
     return score;
 }
 //checks to see if player has blackjack
-bool checkBlackjack(std::vector<Card> hand){
+bool const checkBlackjack(std::vector<Card> hand){
     return (addHand(hand)==21);
 }
 
 //checks to see if player was dealt doubles
-bool checkSplit(std::vector<Card> hand){
+bool const checkSplit(std::vector<Card> hand){
     char ans;
     bool split, valid;
     int val;
@@ -169,13 +184,12 @@ void dealAndCheck(Player& p1, Player& dealer, Deck& deck, bool& split, bool& bla
         blackjack = true;
     else if(checkSplit(p1.getHand())){
         //creates temporary card and replaces hand after split round
-        p1.removeCard(1);
         split = true;
     }
 }
 
 //actually runs hand, most relevant part of code
-void playHand(Player& p1, Player& dealer, Deck& deck, double bet, bool& blackjack, bool& split){
+void playHand(Player& p1, Player& dealer, Deck& deck, double bet){
     bool stand, bust, win, tie, surrender;
     int pScore, dScore, deckSize;
     char choice;
@@ -185,6 +199,7 @@ void playHand(Player& p1, Player& dealer, Deck& deck, double bet, bool& blackjac
     bust = false;
     win = false;
     tie = false;
+    surrender = false;
 
     //asks for player moves and checks validity until stand or surreder
     while(!stand && !win && !surrender){
@@ -263,7 +278,7 @@ void playHand(Player& p1, Player& dealer, Deck& deck, double bet, bool& blackjac
 
 }
 
-bool checkPlayAgain(){
+bool const checkPlayAgain(){
     char playAgainChoice;
     bool playAgain;
     
@@ -291,11 +306,37 @@ bool checkPlayAgain(){
     return playAgain;
 }
 
-bool checkBroke(double funds){
+bool const checkBroke(double funds){
     if(funds == 0){
-        std::cout << "You broke. Hope you had fun.\n\nBye\n";
+        std::cout << "Too Bad. You broke.\nHope you had fun.\n";
         return true;
     }
     else
         return false;
+}
+
+double doubleDown(Player p, double& bet){
+    int total;
+    char ans;
+    bool valid;
+    total = p.getCard(0).getValue() + p.getCard(1).getValue();
+    if(total>=9 && total <=11){
+        while(valid != true){
+            std::cout << "Do you want to double down on your bet?(Y/N)";
+            std::cin >> ans;
+            ans = toupper(ans);
+            switch(ans){
+                case 'Y':
+                    bet = 2.0 * bet;
+                    valid = true;
+                    break;
+                case 'N':
+                    valid = true;
+                    break;
+                default:
+                    std::cout << "Your input was invalid.\n";
+                    break;
+            } 
+    }
+    return bet;
 }
