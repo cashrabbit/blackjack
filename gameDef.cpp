@@ -183,13 +183,21 @@ double Player::bet(){
     double amt;
     bool valid;
 
-    do{
-    //takes in player bet
-    std::cout << "Enter bet amount: ";
-    std::cin >> amt;
-    if(amt > funds || amt > 9999.0)
-        std::cout << "You don't have the facilities for that\n"; 
-    }while (amt>funds);
+    while(!valid){
+        valid = true;
+        //takes in player bet
+        std::cout << "Enter bet amount: ";
+        std::cin >> amt;
+        if(std::cin.fail()){
+            std::cin.clear();
+            std::cin.ignore();
+            valid = false;
+        }
+        if(amt > funds || amt > 9999.0){
+            std::cout << "You don't have the facilities for that\n"; 
+            valid = false;
+        }
+    }
     rakeIn(-amt);
     return amt;
 }

@@ -3,8 +3,6 @@
 #include <iostream>
 #include <vector>
 
-
-//3 known issues: ace counter add hand, split function dont work, needs insurance
 void runBlackjack(){
     //creates player & dealer
     Player p1, dealer;
@@ -20,8 +18,7 @@ void runBlackjack(){
     deckSize = 52;
     playAgain = true;
 
-    //set random seed credits to my 
-    //beautiful girlfriend: Laura Saravia
+    //set random seed credits to my beautiful girlfriend: Laura Saravia
     srand(time(0));
 
     //outputs welcome and rules
@@ -30,6 +27,7 @@ void runBlackjack(){
     
     //creates repeating game
     while(playAgain){
+        //makes sure player has money
         if(!checkBroke(p1.getFunds())){
             Deck deck;
             p1.printFunds();
@@ -42,15 +40,32 @@ void runBlackjack(){
 
             //ask to double down
             doubleDown(p1, bet);
+
+            //ask for insurance side bet
+            insurance(p1, dealer, bet);
             
-            if(blackjack && checkBlackjack(dealer.getHand()) == false ){
+            if(blackjack){
+                //checks for dealers blackjack and sets tie
+                if(checkBlackjack(dealer.getHand())){
+                    std::cout << "You both got blackjack! Here is your bet back.\n\n";
+                    p1.rakeIn(bet);
+                    p1.clearHand();
+                    dealer.clearHand();
+                }
+                //regular blackjack procession
+                else{   
                     std::cout<< "BlackJack!! You win\n";
-                    p1.rakeIn(3.0*bet/2.0+bet);
+                    //3:2 payout
+                    p1.rakeIn(2.5*bet);
                     p1.printFunds();
                     p1.clearHand();
                     dealer.clearHand();            
+                }
             }
             else if(split){
+                //split bet betweeen both split cards
+                bet = bet/2.0;
+                
                 //create temp vector and copy cards into it
                 std::vector<Card> splitCards;
                 splitCards.push_back(p1.getCard(0));
@@ -72,7 +87,6 @@ void runBlackjack(){
                 p1.setHand(splitCards[1]);
                 deal(dealer, deck);
                 deal(dealer, deck);
-                p1.rakeIn(-bet);
                 p1.printHand();
                 playHand(p1, dealer, deck, bet);
             }
@@ -107,10 +121,6 @@ int const addHand(std::vector<Card> hand){
             else
                 score += 11;
         }
-    }
-    for(int i = 0; i< hand.size(); i++){
-        if(hand[i].getValue()==1 && score > 21)
-            score -= 10;
     }
     
     return score;
@@ -217,9 +227,14 @@ void playHand(Player& p1, Player& dealer, Deck& deck, double bet){
             stand = true;
         else if(choice == 'L')
             surrender = true;
-        else
-            std::cout << "Invalid Input. Choose H,S, or L.\n";
+        else{
+            std::cout << "Invalid Input.\nChoose H,S, or L.\n";
+            std::cin.clear();
+        }
+        //gathers score after turn
         pScore = addHand(p1.getHand());
+
+        //checks for bust and goes through other win conditions
         if(pScore > 21){
             stand = true;
             bust = true;
@@ -227,11 +242,13 @@ void playHand(Player& p1, Player& dealer, Deck& deck, double bet){
         if(pScore == 21)
             win = true;
     }
+    //shows bust before dealers cards are added
     if(bust){
         std::cout << "You Bust!\n";
         win = false;
     }
     else{
+        //adds up dealers hand until its >=17
         std::cout << "Dealer's Hand: ";
         dealer.printHand(addHand(dealer.getHand()));
         dScore = addHand(dealer.getHand());
@@ -240,6 +257,7 @@ void playHand(Player& p1, Player& dealer, Deck& deck, double bet){
             dScore = addHand(dealer.getHand());
             dealer.printHand(dScore);
         }
+    //compares player and dealer score 
     if(dScore == pScore && pScore <=21)
         tie = true;
     //displays scores
@@ -267,7 +285,7 @@ void playHand(Player& p1, Player& dealer, Deck& deck, double bet){
     }       
     }
     if(win)
-            p1.rakeIn(3.0*bet/2.0 + bet);
+            p1.rakeIn(2.0*bet);
         else if(tie)
             p1.rakeIn(bet); 
     p1.printFunds(); 
@@ -284,11 +302,12 @@ bool const checkPlayAgain(){
     
     
     do{
+        //displays to ask users if they want to play again
         std::cout << "Do you want to play again? (Y/N)";
         std:: cin >> playAgainChoice;
         playAgainChoice = toupper(playAgainChoice);
 
-        
+        //checks validity
         switch(playAgainChoice){
             case 'Y':
                 playAgain = true;
@@ -298,7 +317,7 @@ bool const checkPlayAgain(){
                 break;
         default: 
                 playAgainChoice = 'Z';
-                std::cout << "Invalid Choice. Try again";
+                std::cout << "Invalid Choice. Try again.\n";
                 break;
         }
     }while(playAgainChoice == 'Z');
@@ -307,6 +326,7 @@ bool const checkPlayAgain(){
 }
 
 bool const checkBroke(double funds){
+    //checks broketitude and returns bool
     if(funds == 0){
         std::cout << "Too Bad. You broke.\nHope you had fun.\n";
         return true;
@@ -315,18 +335,22 @@ bool const checkBroke(double funds){
         return false;
 }
 
-double doubleDown(Player p, double& bet){
+double doubleDown(Player& p, double& bet){
     int total;
     char ans;
     bool valid;
+    //adds up initial hand and check if its 9, 10, or 11
     total = p.getCard(0).getValue() + p.getCard(1).getValue();
     if(total>=9 && total <=11){
+        //if true, asks user if they want to double their bet
         while(valid != true){
             std::cout << "Do you want to double down on your bet?(Y/N)";
             std::cin >> ans;
             ans = toupper(ans);
+            //checks validity
             switch(ans){
                 case 'Y':
+                    p.rakeIn(-bet);
                     bet = 2.0 * bet;
                     valid = true;
                     break;
@@ -337,6 +361,59 @@ double doubleDown(Player p, double& bet){
                     std::cout << "Your input was invalid.\n";
                     break;
             } 
+        }
     }
     return bet;
+}
+
+void insurance(Player& p1, Player dealer, double& bet){
+    bool validAns, validBet;
+    double sideBet;
+    char ans;
+
+    //if dealer has an ace, ask the user if they want to make an insurance side bet
+    if(dealer.getCard(0).getValue() == 1){
+        do{
+            std::cout << "The Dealer has an Ace.\nWould you like insurance against a natural blackjack?\n(Y/N): ";
+            std::cin >> ans;
+            ans = toupper(ans);
+            //checks validity
+            switch(ans){
+                case 'Y':
+                case 'N':
+                    validAns = true;
+                    break;
+                default:
+                    std::cout << "Invalid Input. Try again\n";
+                    break;
+            }
+        }while(validAns==false);
+        if(ans == 'Y'){
+            //check validity of side bet
+            while(!validBet){
+                validBet = true;
+                std::cout << "Input bet between 0 and " << bet/2.0 << ": ";
+                std::cin >> sideBet;
+                if(std::cin.fail()){
+                    std::cin.clear();
+                    std::cin.ignore();
+                    validBet = false;
+                    }
+                if(sideBet > 0 && sideBet <= bet/2.0)
+                    validBet = true;
+                else
+                    std::cout << "Invalid Input. Try again.\n";
+            }
+            //removes side bet from funds
+            p1.rakeIn(-sideBet);
+
+            //returns double value if the side bet hits
+            if(dealer.getCard(1).getValue() >= 10){
+                p1.rakeIn(3.0*sideBet);
+                std::cout << "The dealer's got blackjack. Your side bet cashes out.\n";
+            }
+            else
+                std::cout << "Blackjack didn't come. You lost the side bet.\n";
+        }
+    }
 }

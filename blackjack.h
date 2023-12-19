@@ -9,4 +9,5 @@ void dealAndCheck(Player& p1, Player& dealer, Deck& deck, bool& split, bool& bla
 void playHand(Player& p1, Player& dealer, Deck& deck, const double bet);
 bool const checkPlayAgain();
 bool const checkBroke(double funds);
-double doubleDown(Player p, double& bet);
+double doubleDown(Player& p, double& bet);
+void insurance(Player& p1, Player dealer, double& bet);
